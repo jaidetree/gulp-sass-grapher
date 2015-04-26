@@ -1,0 +1,8 @@
+tests: 'test/**/*.coffee'
+src:
+  coffee: 'src/**/*.coffee'
+build:
+  coffee: './lib'
+watch:
+  coffee: 'src/**/*.coffee'
+  
