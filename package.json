@@ -4,7 +4,7 @@
   "description": "A gulp plugin that makes use of the sass-graph package that libsass uses.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
