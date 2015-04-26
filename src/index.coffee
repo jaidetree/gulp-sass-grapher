@@ -52,23 +52,27 @@ class SassGrapher
         this.push file
         return next()
 
-      # Get ancestors
-      graph.visitAncestors file.path, (filepath) ->
+      # Push the most parential files to the stream otherwise recursively
+      # trace up the ancestors.
+      getAncestors = (childFilepath) ->
+        graph.visitAncestors childFilepath, (filepath) ->
+          # If it's a partial, skip adding it.
+          if path.basename(filepath).slice(0, 1) == '_'
+            getAncestors(filepath)
+            return
 
-        # If it's a partial, skip adding it.
-        if path.basename(filepath).slice(0, 1) == '_'
-          return
+          hasImports = true
+        
+          # Push the root scss file down the stream
+          stream.push(new File(
+            cwd: file.cwd
+            base: path.dirname(filepath)
+            path: filepath
+            contents: new Buffer(fs.readFileSync(filepath, 'utf8'))
+          ))
 
-        hasImports = true
-      
-        # Push the root scss file down the stream
-        stream.push(new File(
-          cwd: file.cwd
-          base: path.dirname(filepath)
-          path: filepath
-          contents: new Buffer(fs.readFileSync(filepath, 'utf8'))
-        ))
-
+      # Get the ancestors
+      getAncestors(file.path)
 
       # If nothing imports this file, just pass it along
       if !hasImports
