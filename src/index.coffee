@@ -24,6 +24,7 @@ class SassGrapher
 
     return through.obj (file, enc, next) ->
       hasImports = false
+      stream = this
 
       if file.isNull()
         this.push file
@@ -35,14 +36,14 @@ class SassGrapher
         return next()
 
       if file.event && file.event == 'added'
-        @buildGraph()
+        buildGraph()
 
       # What if we are given a root file?
       sassData = graph.index[file.path]
 
       # If the file is not indexed, try rebuilding the graph
       if !sassData
-        @builGraph()
+        builGraph()
         sassData = graph.index[file.path]
 
       # If the file is not indexed and is not imported by anything just
@@ -52,7 +53,7 @@ class SassGrapher
         return next()
 
       # Get ancestors
-      graph.visitAncestors file.path, (filepath) =>
+      graph.visitAncestors file.path, (filepath) ->
 
         # If it's a partial, skip adding it.
         if path.basename(filepath).slice(0, 1) == '_'
@@ -61,7 +62,7 @@ class SassGrapher
         hasImports = true
       
         # Push the root scss file down the stream
-        this.push(new File(
+        stream.push(new File(
           cwd: file.cwd
           base: path.dirname(filepath)
           path: filepath
