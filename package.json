@@ -21,7 +21,7 @@
     "gulp-watch"
   ],
   "author": "Jay Zawrotny",
-  "license": "ISC",
+  "license": "BSD",
   "bugs": {
     "url": "https://github.com/jayzawrotny/gulp-sass-grapher/issues"
   },

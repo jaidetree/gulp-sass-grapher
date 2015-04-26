@@ -18,6 +18,7 @@ paths =
   sassDir: 'test/fixtures'
   singleSassPartial: 'test/fixtures/_a.scss'
   singleSassFile: 'test/fixtures/single.scss'
+  partialFileTest: 'test/fixtures/partials/_a.scss'
   oneLayerSassFile: 'test/fixtures/_a.scss'
   twoLayerSassFile: 'test/fixtures/_b.scss'
   threeLayerSassFile: 'test/fixtures/_c.scss'
@@ -77,7 +78,20 @@ describe 'Gulp SASS Graph', ->
           assert.equal cssData.stylesheet.rules.length, 2, 'Other than 2 css rules in output'
           next()
           done()
-
+  
+    it 'should find the nested root', (done) ->
+      sassGrapher.init paths.sassDir, options
+      gulp.src(paths.partialFileTest, { base: path.resolve('test/fixtures') })
+        .pipe sassGrapher.ancestors()
+        .pipe sass(
+          includePaths: loadPaths
+        )
+        .pipe gulp.dest(paths.output)
+        .pipe through.obj (file, enc, next) ->
+          cssData = parseCSS(file.contents.toString())
+          assert.equal cssData.stylesheet.rules.length, 3, 'Other than 3 css rules in output'
+          next()
+          done()
 
 
   describe 'Nested Files', ->
