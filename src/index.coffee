@@ -19,9 +19,8 @@ class SassGrapher
   # Returns a through transform stream
   ###
   ancestors: ->
+    self = this
     graph = @graph
-    buildGraph = @buildGraph
-
     return through.obj (file, enc, next) ->
       hasImports = false
       stream = this
@@ -35,15 +34,15 @@ class SassGrapher
         this.push file
         return next()
 
-      if file.event && file.event == 'added'
-        buildGraph()
+      if file.event && file.event == 'add'
+        graph = self.reconstruct()
 
       # What if we are given a root file?
-      sassData = graph.index[file.path]
+      sassData = self.graph.index[file.path]
 
       # If the file is not indexed, try rebuilding the graph
       if !sassData
-        buildGraph()
+        graph = self.reconstruct()
         sassData = graph.index[file.path]
 
       # If the file is not indexed and is not imported by anything just
@@ -55,7 +54,7 @@ class SassGrapher
       # Push the most parential files to the stream otherwise recursively
       # trace up the ancestors.
       getAncestors = (childFilepath) ->
-        graph.visitAncestors childFilepath, (filepath) ->
+        self.graph.visitAncestors childFilepath, (filepath) ->
           # If it's a partial, skip adding it.
           if path.basename(filepath).slice(0, 1) == '_'
             return
@@ -86,6 +85,19 @@ class SassGrapher
   init: (@sourceDir, @options) ->
     @buildGraph()
 
+  ###
+  # Reconstruct
+  # API Method for reconstructing the graph
+  ###
+  reconstruct: ->
+    @buildGraph()
+    return @graph
+
+  ###
+  # Build Graph
+  # Method for reconstructing the graph. Automatically called on add events but
+  # can be called manually in other contexts.
+  ###
   buildGraph: ->
     @graph = grapher.parseDir(path.resolve(@sourceDir), @options)
 
