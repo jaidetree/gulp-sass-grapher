@@ -82,8 +82,6 @@ class SassGrapher
   ###
   # Init
   # Method for creating the graph instance
-  #
-  # @private
   ###
   init: (@sourceDir, @options) ->
     @buildGraph()
