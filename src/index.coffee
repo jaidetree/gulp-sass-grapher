@@ -22,6 +22,7 @@ class SassGrapher
   ancestors: ->
     self = this
     return through.obj (file, enc, next) ->
+      fileAdded = false
       hasImports = false
       stream = this
 
@@ -36,32 +37,45 @@ class SassGrapher
 
       if file.event && file.event == 'add'
         self.reconstruct(file.relative)
+        fileAdded = true
 
+      ###
       # What if we are given a root file?
+      ###
       sassData = self.graph.index[file.path]
 
+      ###
       # If the file is not indexed, try rebuilding the graph
-      if !sassData or sassData.importedBy.length == 0
+      ###
+      if !fileAdded and (!sassData or sassData.importedBy.length == 0)
         self.reconstruct(file.relative)
         sassData = self.graph.index[file.path]
 
+      ###
       # If the file is not indexed and is not imported by anything just
       # pass it along
+      ###
       if !sassData or sassData.importedBy.length == 0
         this.push file
         return next()
 
+      ###
       # Push the most parential files to the stream otherwise recursively
       # trace up the ancestors.
+      ###
       getAncestors = (childFilepath) ->
         self.graph.visitAncestors childFilepath, (filepath) ->
+          ###
           # If it's a partial, skip adding it.
+          ###
           if path.basename(filepath).slice(0, 1) == '_'
             return
 
           hasImports = true
         
+          ###
           # Push the root scss file down the stream
+          ###
           stream.push(new File(
             cwd: file.cwd
             base: path.dirname(filepath)
@@ -69,10 +83,14 @@ class SassGrapher
             contents: new Buffer(fs.readFileSync(filepath, 'utf8'))
           ))
 
+      ###
       # Get the ancestors
+      ###
       getAncestors(file.path)
 
+      ###
       # If nothing imports this file, just pass it along
+      ###
       if !hasImports
         this.push file
 
