@@ -1,6 +1,6 @@
 {
   "name": "gulp-sass-grapher",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A gulp plugin that makes use of the sass-graph package that libsass uses.",
   "main": "index.js",
   "scripts": {
