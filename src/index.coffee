@@ -4,6 +4,7 @@
 File = require 'vinyl'
 fs = require 'fs'
 grapher = require 'sass-graph'
+gutil = require 'gulp-util'
 path = require 'path'
 through = require 'through2'
 
@@ -20,7 +21,6 @@ class SassGrapher
   ###
   ancestors: ->
     self = this
-    graph = @graph
     return through.obj (file, enc, next) ->
       hasImports = false
       stream = this
@@ -35,19 +35,19 @@ class SassGrapher
         return next()
 
       if file.event && file.event == 'add'
-        graph = self.reconstruct()
+        self.reconstruct(file.relative)
 
       # What if we are given a root file?
       sassData = self.graph.index[file.path]
 
       # If the file is not indexed, try rebuilding the graph
-      if !sassData
-        graph = self.reconstruct()
-        sassData = graph.index[file.path]
+      if !sassData or sassData.importedBy.length == 0
+        self.reconstruct(file.relative)
+        sassData = self.graph.index[file.path]
 
       # If the file is not indexed and is not imported by anything just
       # pass it along
-      if !sassData || sassData.importedBy.length == 0
+      if !sassData or sassData.importedBy.length == 0
         this.push file
         return next()
 
@@ -89,7 +89,11 @@ class SassGrapher
   # Reconstruct
   # API Method for reconstructing the graph
   ###
-  reconstruct: ->
+  reconstruct: (file) ->
+    if file
+      white = gutil.colors.white
+      cyan = gutil.colors.cyan
+      gutil.log white('Rebuilding graph for'), cyan(file) + white('...')
     @buildGraph()
     return @graph
 
