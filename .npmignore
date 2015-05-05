@@ -1,3 +1,5 @@
 tasks
 src
 test
+gulpfile.js
+gulpfile.coffee

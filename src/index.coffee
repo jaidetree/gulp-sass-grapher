@@ -58,7 +58,6 @@ class SassGrapher
         graph.visitAncestors childFilepath, (filepath) ->
           # If it's a partial, skip adding it.
           if path.basename(filepath).slice(0, 1) == '_'
-            getAncestors(filepath)
             return
 
           hasImports = true

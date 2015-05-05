@@ -1,6 +1,7 @@
 
 # Gulp Sass Grapher [![Build Status][travis-image]][travis-url] [![NPM version][npm-image]][npm-url]
 [![Dependency Status][depstat-image]][depstat-url] [![devDependency Status][devdepstat-image]][devdepstat-url]
+
 A gulp plugin for passing only the root SASS files down the stream. Unlike other plugins this one accounts for rebuilding the graph index when new files are added along with a manual API to rebuild the index.
 
 > [Sass Graph](https://github.com/xzyfer/sass-graph) plugin for [gulp][gulp] 3.
