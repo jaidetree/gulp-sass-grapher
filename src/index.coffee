@@ -43,7 +43,7 @@ class SassGrapher
 
       # If the file is not indexed, try rebuilding the graph
       if !sassData
-        builGraph()
+        buildGraph()
         sassData = graph.index[file.path]
 
       # If the file is not indexed and is not imported by anything just
