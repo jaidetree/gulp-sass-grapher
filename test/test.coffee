@@ -12,16 +12,17 @@ through = require 'through2'
 graph = null
 
 loadPaths = ['./test/fixtures']
-
-paths =
-  sass: 'test/fixtures/**/*.scss'
-  sassDir: 'test/fixtures'
-  singleSassPartial: 'test/fixtures/_a.scss'
-  singleSassFile: 'test/fixtures/single.scss'
-  partialFileTest: 'test/fixtures/partials/_a.scss'
-  oneLayerSassFile: 'test/fixtures/_a.scss'
-  twoLayerSassFile: 'test/fixtures/_b.scss'
-  threeLayerSassFile: 'test/fixtures/_c.scss'
+basePath = path.resolve('test/fixtures')
+sassDir = path.resolve('test/fixtures')
+files =
+  sass: sassDir + '/**/*.scss'
+  sassDir: sassDir
+  singleSassPartial: sassDir + '/_a.scss'
+  singleSassFile: sassDir + '/single.scss'
+  partialFileTest: sassDir + '/partials/_a.scss'
+  oneLayerSassFile: sassDir + '/_a.scss'
+  twoLayerSassFile: sassDir + '/_b.scss'
+  threeLayerSassFile: sassDir + '/_c.scss'
   output: 'test/output'
 
 options =
@@ -34,10 +35,12 @@ parseCSS = (cssText) ->
 describe 'Gulp SASS Graph', ->
   describe 'sass-graph', ->
     it 'should work', (done) ->
-      graph = grapher.parseDir(path.resolve(paths.sassDir), options)
-      ancestors = graph.visitAncestors path.resolve(paths.singleSassPartial), (filepath, data) ->
-        assert.equal path.basename(filepath), 'single.scss'
-        done()
+      ancestors = []
+      graph = grapher.parseDir(files.sassDir, options)
+      graph.visitAncestors files.singleSassPartial, (filepath, data) ->
+        ancestors.push(filepath)
+      assert.equal(ancestors.length, 1)
+      done()
 
 
   describe 'gulp-sass-grapher', ->
@@ -51,28 +54,28 @@ describe 'Gulp SASS Graph', ->
       assert.equal typeof sassGrapher.ancestors, 'function', 'SassGrapher.ancestors was not a function'
 
     it 'should compile the parent file', (done) ->
-      sassGrapher.init paths.sassDir, options
+      sassGrapher.init files.sassDir, options
 
-      gulp.src(paths.singleSassPartial, { base: path.resolve('test/fixtures') })
+      gulp.src(files.singleSassPartial, { base: basePath })
         .pipe sassGrapher.ancestors()
         .pipe sass(
           includePaths: loadPaths
         )
-        .pipe gulp.dest(paths.output)
+        .pipe gulp.dest(files.output)
         .pipe through.obj (file, enc, next) ->
           cssData = parseCSS(file.contents.toString())
           assert.equal cssData.stylesheet.rules.length, 2, 'Other than 2 css rules in output'
           done()
 
     it 'should compile the root file', (done) ->
-      sassGrapher.init paths.sassDir, options
+      sassGrapher.init files.sassDir, options
 
-      gulp.src(paths.singleSassFile, { base: path.resolve('test/fixtures') })
+      gulp.src(files.singleSassFile, { base: basePath })
         .pipe sassGrapher.ancestors()
         .pipe sass(
           includePaths: loadPaths
         )
-        .pipe gulp.dest(paths.output)
+        .pipe gulp.dest(files.output)
         .pipe through.obj (file, enc, next) ->
           cssData = parseCSS(file.contents.toString())
           assert.equal cssData.stylesheet.rules.length, 2, 'Other than 2 css rules in output'
@@ -80,36 +83,36 @@ describe 'Gulp SASS Graph', ->
           done()
   
     it 'should find the nested root', (done) ->
-      sassGrapher.init paths.sassDir, options
-      gulp.src(paths.partialFileTest, { base: path.resolve('test/fixtures') })
+      sassGrapher.init files.sassDir, options
+      gulp.src(files.partialFileTest, { base: basePath })
         .pipe sassGrapher.ancestors()
         .pipe sass(
           includePaths: loadPaths
         )
-        .pipe gulp.dest(paths.output)
+        .pipe gulp.dest(files.output)
         .pipe through.obj (file, enc, next) ->
           cssData = parseCSS(file.contents.toString())
           assert.equal cssData.stylesheet.rules.length, 3, 'Other than 3 css rules in output'
           next()
-          done()
+      done()
 
 
   describe 'Nested Files', ->
-    files = [
-      paths.oneLayerSassFile
-      paths.twoLayerSassFile
-      paths.threeLayerSassFile
+    fileList = [
+      files.oneLayerSassFile
+      files.twoLayerSassFile
+      files.threeLayerSassFile
     ]
 
-    _.each files, (filepath, i) ->
+    _.each fileList, (filepath, i) ->
       it 'should compile the root file ' + (i + 1) + ' layer(s) deep', (done) ->
-        sassGrapher.init paths.sassDir, options
+        sassGrapher.init files.sassDir, options
         gulp.src(filepath, { base: path.resolve('test') })
           .pipe sassGrapher.ancestors()
           .pipe sass(
             includePaths: loadPaths
           )
-          .pipe gulp.dest(paths.output)
+          .pipe gulp.dest(files.output)
           .pipe through.obj (file, enc, next) ->
             cssText = file.contents.toString()
             assert.notEqual cssText.indexOf('background: '), -1, 'Could not find background in resulting CSS'
