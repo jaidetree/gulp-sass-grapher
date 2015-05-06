@@ -78,7 +78,7 @@ class SassGrapher
           ###
           stream.push(new File(
             cwd: file.cwd
-            base: path.dirname(filepath)
+            base: file.base
             path: filepath
             contents: new Buffer(fs.readFileSync(filepath, 'utf8'))
           ))
