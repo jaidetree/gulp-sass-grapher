@@ -38,8 +38,8 @@ Here is an example using gulp-sass-grapher with gulp-watch.
 
 
 [gulp]: http://gulpjs.com/
-[npm-url]: https://npmjs.org/package/gulp-coffeelint
-[npm-image]: http://img.shields.io/npm/v/gulp-coffeelint.svg
+[npm-url]: https://npmjs.org/package/gulp-sass-grapher
+[npm-image]: http://img.shields.io/npm/v/gulp-sass-grapher.svg
 
 [travis-url]: http://travis-ci.org/jayzawrotny/gulp-sass-grapher
 [travis-image]: https://travis-ci.org/jayzawrotny/gulp-sass-grapher.svg?branch=master
